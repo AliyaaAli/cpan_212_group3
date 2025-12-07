@@ -61,7 +61,7 @@ app.get("/movies", (req, res) => {
 
 // Root
 app.get("/", (req, res) => {
-  res.render("index"); // views/index.ejs
+  res.render("home"); // views/index.ejs
 });
 
 // Server start
