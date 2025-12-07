@@ -11,7 +11,7 @@
 </div>
 
   <% if (!currentUser) { %>
-    <p>Please <a href="/login">login</a> or <a href="/register">register</a> to continue.</p>
+    <p>Please <a href="/auth/login">login</a> or <a href="/auth/register">register</a> to continue.</p>
   <% } else { %>
     <p>You are logged in! <a href="/movies">Explore movies</a></p>
   <% } %>
