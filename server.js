@@ -18,7 +18,9 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Session setup
+// Tell Express it's behind a proxy (needed for secure cookies on Render)
+app.set("trust proxy", 1);
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "secret",
@@ -26,16 +28,17 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URI,
-      ttl: 7 * 24 * 60 * 60, // 7 days
+      ttl: 7 * 24 * 60 * 60,
     }),
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      maxAge: 1000 * 60 * 60 * 24 * 7,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // only true in production
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     },
   })
 );
+
 
 // Make currentUser available in all EJS views
 app.use((req, res, next) => {
