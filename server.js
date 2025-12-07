@@ -58,7 +58,7 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // only true in production
-      sameSite: "none", // allow cookies across redirects
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     },
   })
 );
