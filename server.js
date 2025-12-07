@@ -18,9 +18,10 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Tell Express it's behind a proxy (needed for secure cookies on Render)
+// Trust proxy (needed for secure cookies on Render)
 app.set("trust proxy", 1);
 
+// Session setup
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "secret",
@@ -28,17 +29,16 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URI,
-      ttl: 7 * 24 * 60 * 60,
+      ttl: 7 * 24 * 60 * 60, // 7 days
     }),
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // only true in production
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     },
   })
 );
-
 
 // Make currentUser available in all EJS views
 app.use((req, res, next) => {
@@ -52,19 +52,10 @@ app.set("views", path.join(__dirname, "views"));
 
 // Routes
 const authRoutes = require("./routes/auth");
+const movieRoutes = require("./routes/movies");
+
 app.use("/auth", authRoutes);
-
-// Protected route example
-app.get("/movies", (req, res) => {
-  console.log("Session check:", req.session);
-  console.log("User ID:", req.session ? req.session.userId : null);
-
-  if (!req.session || !req.session.userId) {
-    return res.redirect("/auth/login");
-  }
-
-  res.render("movies"); // views/movies.ejs
-});
+app.use("/movies", movieRoutes);
 
 // Homepage route
 app.get("/", (req, res) => {
