@@ -1,98 +1,73 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcryptjs");
-const { check, validationResult } = require("express-validator");
-const User = require("../models/User");
+const User = require("../models/User"); // adjust path to your User model
 
+// Show login form
+router.get("/login", (req, res) => {
+  res.render("auth/login"); // make sure you have views/auth/login.ejs
+});
 
-router.get("/register", (req, res) => res.render("register"));
-
-router.post("/register", [
-  check("username").notEmpty().withMessage("Username required"),
-  check("email").isEmail().withMessage("Valid email required"),
-  check("password").isLength({ min: 6 }).withMessage("Password min 6 chars")
-], async (req, res) => {
-  console.log("Register POST received:", req.body);
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.render("register", { errors: errors.array() });
-
-  const { username, email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
+// Handle login
+router.post("/login", async (req, res) => {
+  const { username, password } = req.body;
 
   try {
-    const user = new User({ username, email, password: hashedPassword });
-    await user.save();
-    console.log("Registration success, redirecting...");
+    const user = await User.findOne({ username });
 
+    if (!user || user.password !== password) {
+      return res.status(401).render("auth/login", { error: "Invalid credentials" });
+    }
+
+    // Save user ID in session
     req.session.userId = user._id;
-    
-    // wait for saving
-    req.session.save((err) => {
-      if (err) {
-        console.error("Session save error:", err);
-        return res.redirect("/auth/register");
-      }
-      console.log("Session saved, userId:", req.session.userId);
-      res.redirect("/");
-    });
-  } catch (err) {
-    res.render("register", { errors: [{ msg: "Email already exists" }] });
-  }
-}); 
-
-
-router.get("/login", (req, res) => res.render("login"));
-
-router.post("/login", [
-  check("email").isEmail(),
-  check("password").notEmpty()
-], async (req, res) => {
-
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.render("login", { errors: errors.array() });
-    }
-
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.render("login", { errors: [{ msg: "Invalid credentials" }] });
-    }
-
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-      return res.render("login", { errors: [{ msg: "Invalid credentials" }] });
-    }
-
-    // Debug
     console.log("Login success, user._id:", user._id);
 
-    req.session.userId = user._id;
-    req.session.save(err => {
-      if (err) {
-        console.error("Session save error:", err);
-        return res.redirect("/auth/login");
-      }
-      console.log("Session saved, userId:", req.session.userId);
-      res.redirect("/");
-    });
-
+    // Redirect to a protected page
+    return res.redirect("/movies");
   } catch (err) {
-    console.error("ERROR in /auth/login:", err);
-    return res.status(500).render("login", { errors: [{ msg: "Internal Server Error" }] });
+    console.error("Login error:", err);
+    res.status(500).send("Internal server error");
   }
 });
 
-
-// Logout
-router.get("/logout", (req, res) => {
+// Handle logout
+router.post("/logout", (req, res) => {
   req.session.destroy((err) => {
-    if (err) console.log(err);
-    res.clearCookie('connect.sid'); 
-    res.redirect("/");
+    if (err) {
+      console.error("Logout error:", err);
+      return res.status(500).send("Could not log out");
+    }
+    res.clearCookie("connect.sid");
+    res.redirect("/auth/login");
   });
+});
+
+// Show register form
+router.get("/register", (req, res) => {
+  res.render("auth/register"); // make sure you have views/auth/register.ejs
+});
+
+// Handle register
+router.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).render("auth/register", { error: "Username already exists" });
+    }
+
+    const newUser = new User({ username, password });
+    await newUser.save();
+
+    req.session.userId = newUser._id;
+    console.log("Registration success, user._id:", newUser._id);
+
+    res.redirect("/movies");
+  } catch (err) {
+    console.error("Register error:", err);
+    res.status(500).send("Internal server error");
+  }
 });
 
 module.exports = router;
