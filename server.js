@@ -61,12 +61,12 @@ app.use(
       mongoUrl: process.env.MONGO_URI,
       ttl: 7 * 24 * 60 * 60, // 7 days
     }),
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // only enforce HTTPS in production
-      sameSite: "lax",
-    },
+   cookie: {
+  maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production", // only true in production
+  sameSite: "lax",
+},
   })
 );
 
