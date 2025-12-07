@@ -14,6 +14,12 @@ app.use(express.json());
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
 
+// Make currentUser available in all EJS views
+app.use((req, res, next) => {
+  res.locals.currentUser = req.session.userId || null;
+  next();
+});
+
 // Database connection
 mongoose
   .connect(process.env.MONGO_URI)
