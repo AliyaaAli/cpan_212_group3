@@ -7,18 +7,18 @@ const MongoStore = require("connect-mongo");
 require("dotenv").config();
 
 // Routes
-const authRoutes = require("../routes/auth");
-const movieRoutes = require("../routes/movies");
+const authRoutes = require("./routes/auth");
+const movieRoutes = require("./routes/movies");
 
 // View engine setup
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "..", "views"));
+app.set("views", path.join(__dirname, "views"));
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static assets (CSS, images, JS) from public/
-app.use(express.static(path.join(__dirname, "..", "public")));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Cache control
 app.use((req, res, next) => {
