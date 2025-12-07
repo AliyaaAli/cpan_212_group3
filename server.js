@@ -10,15 +10,7 @@ const app = express();
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
-// Static files
 app.use(express.static(path.join(__dirname, "public")));
-
-// Make currentUser available in all EJS views
-app.use((req, res, next) => {
-  res.locals.currentUser = req.session.userId || null;
-  next();
-});
 
 // Database connection
 mongoose
@@ -45,6 +37,12 @@ app.use(
   })
 );
 
+// Make currentUser available in all EJS views
+app.use((req, res, next) => {
+  res.locals.currentUser = req.session ? req.session.userId : null;
+  next();
+});
+
 // View engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -53,23 +51,24 @@ app.set("views", path.join(__dirname, "views"));
 const authRoutes = require("./routes/auth");
 app.use("/auth", authRoutes);
 
-// Example protected route
+// Protected route example
 app.get("/movies", (req, res) => {
   console.log("Session check:", req.session);
-  console.log("User ID:", req.session.userId);
+  console.log("User ID:", req.session ? req.session.userId : null);
 
-  if (!req.session.userId) {
+  if (!req.session || !req.session.userId) {
     return res.redirect("/auth/login");
   }
 
   res.render("movies"); // views/movies.ejs
 });
 
-// Root
+// Homepage route
 app.get("/", (req, res) => {
-  res.render("home"); // views/index.ejs
+  res.render("home"); // views/home.ejs
 });
 
 // Server start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
