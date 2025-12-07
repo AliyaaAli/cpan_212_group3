@@ -69,6 +69,7 @@ app.use(
   })
 );
 
+
 // Session logging + current user
 app.use((req, res, next) => {
   console.log("Path:", req.path, "| SessionID:", req.sessionID, "| UserId:", req.session.userId);
