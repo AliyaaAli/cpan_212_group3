@@ -4,7 +4,7 @@ const User = require("../models/User"); // adjust path to your User model
 
 // Show login form
 router.get("/login", (req, res) => {
-  res.render("auth/login"); // make sure you have views/auth/login.ejs
+  res.render("login"); // looks for views/login.ejs
 });
 
 // Handle login
@@ -15,7 +15,7 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ username });
 
     if (!user || user.password !== password) {
-      return res.status(401).render("auth/login", { error: "Invalid credentials" });
+      return res.status(401).render("login", { error: "Invalid credentials" });
     }
 
     // Save user ID in session
@@ -38,13 +38,13 @@ router.post("/logout", (req, res) => {
       return res.status(500).send("Could not log out");
     }
     res.clearCookie("connect.sid");
-    res.redirect("/auth/login");
+    res.redirect("/login"); // redirect to login page
   });
 });
 
 // Show register form
 router.get("/register", (req, res) => {
-  res.render("auth/register"); // make sure you have views/auth/register.ejs
+  res.render("register"); // looks for views/register.ejs
 });
 
 // Handle register
@@ -54,7 +54,7 @@ router.post("/register", async (req, res) => {
   try {
     const existingUser = await User.findOne({ username });
     if (existingUser) {
-      return res.status(400).render("auth/register", { error: "Username already exists" });
+      return res.status(400).render("register", { error: "Username already exists" });
     }
 
     const newUser = new User({ username, password });
