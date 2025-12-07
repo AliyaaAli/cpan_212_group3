@@ -4,12 +4,12 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User"); // adjust path if needed
 
 // Show login form
-router.get("/login", (req, res) => {
+router.get("/auth/login", (req, res) => {
   res.render("login"); // views/login.ejs
 });
 
 // Handle login
-router.post("/login", async (req, res) => {
+router.post("/auth/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -35,14 +35,14 @@ router.post("/login", async (req, res) => {
 });
 
 // Handle logout
-router.post("/logout", (req, res) => {
+router.post("/auth/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.error("Logout error:", err);
       return res.status(500).send("Could not log out");
     }
     res.clearCookie("connect.sid");
-    res.redirect("/login");
+    res.redirect("/auth/login");
   });
 });
 
