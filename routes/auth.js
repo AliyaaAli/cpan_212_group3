@@ -1,3 +1,8 @@
+const express = require("express");
+const router = express.Router();
+const bcrypt = require("bcryptjs");
+const User = require("../models/User"); // adjust path if needed
+
 // Show login form
 router.get("/login", (req, res) => {
   res.render("login"); // views/login.ejs
@@ -70,3 +75,4 @@ router.post("/register", async (req, res) => {
   }
 });
 
+module.exports = router;
