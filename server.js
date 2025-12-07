@@ -1,50 +1,26 @@
+require("dotenv").config();
 const express = require("express");
-const app = express();
-const path = require("path");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
-require("dotenv").config();
+const path = require("path");
 
-const authRoutes = require("./routes/auth");
-const movieRoutes = require("./routes/movies");
+const app = express();
 
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-
+// Middleware
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
+// Static files
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use((req, res, next) => {
-  res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
-  next();
-});
+// Database connection
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-let cached = global.mongoose;
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function connectDB() {
-  if (cached.conn) return cached.conn;
-  if (!cached.promise) {
-    cached.promise = mongoose
-      .connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 })
-      .then((mongoose) => {
-        console.log("MongoDB connected (serverless cached)");
-        return mongoose;
-      })
-      .catch((err) => {
-        console.error("MongoDB connection failed:", err);
-        throw err;
-      });
-  }
-  cached.conn = await cached.promise;
-  return cached.conn;
-}
-connectDB();
-
+// Session setup
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "secret",
@@ -63,18 +39,31 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
-  console.log("Path:", req.path, "| SessionID:", req.sessionID, "| UserId:", req.session.userId);
-  res.locals.currentUser = req.session.userId || null;
-  next();
+// View engine
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+// Routes
+const authRoutes = require("./routes/auth");
+app.use("/auth", authRoutes);
+
+// Example protected route
+app.get("/movies", (req, res) => {
+  console.log("Session check:", req.session);
+  console.log("User ID:", req.session.userId);
+
+  if (!req.session.userId) {
+    return res.redirect("/auth/login");
+  }
+
+  res.render("movies"); // views/movies.ejs
 });
 
-app.use("/auth", authRoutes);      
-app.use("/movies", movieRoutes);
+// Root
+app.get("/", (req, res) => {
+  res.render("index"); // views/index.ejs
+});
 
-app.get("/", (req, res) => res.render("home"));
-
+// Server start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-module.exports = app;
