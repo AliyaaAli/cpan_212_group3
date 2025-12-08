@@ -6,7 +6,7 @@ const movieSchema = new mongoose.Schema({
   year: { type: Number, required: true },
   genres: { type: [String], required: true },
   rating: { type: Number, required: true },
-  addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // Who added the movie
+  addedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } 
 });
 
 module.exports = mongoose.model('Movie', movieSchema);
