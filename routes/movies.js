@@ -94,6 +94,21 @@ router.post("/edit/:id", async (req, res) => {
   }
 });
 
+// Handle delete movie
+router.post("/delete/:id", async (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.redirect("/auth/login");
+  }
+
+  try {
+    await Movie.findByIdAndDelete(req.params.id);
+    res.redirect("/movies");
+  } catch (err) {
+    console.error("Error deleting movie:", err);
+    res.redirect("/movies");
+  }
+});
+
 // Movie details page
 router.get("/:id", async (req, res) => {
   if (!req.session || !req.session.userId) {
@@ -110,3 +125,4 @@ router.get("/:id", async (req, res) => {
 });
 
 module.exports = router;
+
