@@ -34,9 +34,9 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Handle logout
-router.post("/logout", (req, res) => {
-  req.session.destroy((err) => {
+// Handle logout (GET so it works with <a href="/auth/logout">)
+router.get("/logout", (req, res) => {
+  req.session.destroy(err => {
     if (err) {
       console.error("Logout error:", err);
       return res.status(500).send("Could not log out");
@@ -76,3 +76,4 @@ router.post("/register", async (req, res) => {
 });
 
 module.exports = router;
+
