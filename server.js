@@ -19,8 +19,6 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Trust proxy (needed for secure cookies on Render)
-app.set("trust proxy", 1);
-
 // Session setup
 app.use(
   session({
