@@ -1,14 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const User = require("../models/User"); // adjust path if needed
+const User = require("../models/User"); 
 
-// Show login form
 router.get("/login", (req, res) => {
-  res.render("login"); // views/login.ejs
+  res.render("login"); 
 });
 
-// Handle login
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -23,7 +21,6 @@ router.post("/login", async (req, res) => {
       return res.status(401).render("login", { error: "Invalid credentials" });
     }
 
-    // ✅ Save user ID in session
     req.session.userId = user._id;
     console.log("Login success, user._id:", user._id);
 
@@ -34,7 +31,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Handle logout (GET so it works with <a href="/auth/logout">)
 router.get("/logout", (req, res) => {
   req.session.destroy(err => {
     if (err) {
@@ -42,16 +38,14 @@ router.get("/logout", (req, res) => {
       return res.status(500).send("Could not log out");
     }
     res.clearCookie("connect.sid");
-    res.redirect("/auth/login"); // redirect back to login page
+    res.redirect("/auth/login"); 
   });
 });
 
-// Show register form
 router.get("/register", (req, res) => {
-  res.render("register"); // views/register.ejs
+  res.render("register"); 
 });
 
-// Handle register
 router.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
 
